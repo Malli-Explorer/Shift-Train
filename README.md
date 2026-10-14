@@ -1,1 +1,1 @@
-# Shift-Train
+# shifttrain-ai
