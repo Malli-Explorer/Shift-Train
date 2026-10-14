@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: shifttrain-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: CORS_ORIGINS
+        sync: false
+        # Set to your Vercel URL, e.g. https://shifttrain-ai.vercel.app or *
