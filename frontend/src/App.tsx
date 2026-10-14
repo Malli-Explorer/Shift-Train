@@ -10,8 +10,11 @@ export const App: React.FC = () => {
   const { lang, setLang, t, currentLanguageInfo, availableLanguages } = useTranslation();
   const [activeTab, setActiveTab] = useState<'search' | 'crowd' | 'ticket'>('search');
 
-  // API Base URL from env or empty string (for relative proxy)
-  const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+  // API Base URL from env or fallback to Render backend in production
+  const apiBaseUrl = (
+    import.meta.env.VITE_API_BASE_URL ||
+    (import.meta.env.PROD ? 'https://shifttrain-backend.onrender.com' : '')
+  ).replace(/\/$/, '');
 
   return (
     <div className="app-container">

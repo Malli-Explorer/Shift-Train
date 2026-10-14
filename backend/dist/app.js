@@ -16,7 +16,10 @@ const allowedOrigins = process.env.CORS_ORIGINS
     : ['*'];
 app.use((0, cors_1.default)({
     origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
+        if (!origin ||
+            allowedOrigins.includes('*') ||
+            allowedOrigins.includes(origin) ||
+            /^https:\/\/[a-zA-Z0-9-]+\.vercel\.app$/.test(origin)) {
             callback(null, true);
         }
         else {
