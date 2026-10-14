@@ -579,3 +579,635 @@ body {
   font-size: 0.78rem;
   opacity: 0.8;
 }
+
+/* ============================================================
+   Enhanced Accessibility, Shift Advisor & Station Intel Styles
+   ============================================================ */
+
+/* Visually Hidden Utility for Screen Readers (WCAG 2.1 AA) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* High Contrast Focus States for Keyboard Navigation */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 3px solid #0284c7 !important;
+  outline-offset: 2px !important;
+}
+
+/* Base Card Styling */
+.app-card {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+}
+
+.primary-btn {
+  background: #1e3a8a;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.primary-btn:hover:not(:disabled) {
+  background: #1e40af;
+  transform: translateY(-1px);
+}
+
+.primary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.form-group.full-width,
+.form-actions.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  color: #0f172a;
+  background: #ffffff;
+  margin-top: 4px;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.char-counter {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+/* Corridor & Station Pills */
+.corridor-pills-row,
+.station-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.route-pill-btn,
+.pill-btn {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.route-pill-btn:hover,
+.pill-btn:hover {
+  background: #e2e8f0;
+}
+
+.pill-btn.active {
+  background: #1e3a8a;
+  color: #ffffff;
+  border-color: #1e3a8a;
+}
+
+/* Shift Advisor Specific Styles */
+.shift-results-container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.shift-advice-card {
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  border-left: 6px solid #2563eb;
+  background: #eff6ff;
+}
+
+.shift-advice-card.urgency-critical {
+  border-left-color: #dc2626;
+  background: #fef2f2;
+}
+
+.shift-advice-card.urgency-high {
+  border-left-color: #ea580c;
+  background: #fff7ed;
+}
+
+.shift-advice-card.urgency-moderate {
+  border-left-color: #d97706;
+  background: #fffbeb;
+}
+
+.advice-badge-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.urgency-badge {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.badge-critical { background: #fee2e2; color: #991b1b; }
+.badge-high { background: #ffedd5; color: #9a3412; }
+.badge-moderate { background: #fef3c7; color: #92400e; }
+.badge-low { background: #dcfce7; color: #166534; }
+
+.primary-advice-text {
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: #1e293b;
+}
+
+.coach-shift-card {
+  border-left: 4px solid #0d9488;
+}
+
+.coach-shift-flex {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0 8px;
+}
+
+.coach-pill {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+}
+
+.coach-pill.current {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.coach-pill.recommended {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.shift-arrow {
+  font-size: 1.2rem;
+  color: #64748b;
+}
+
+.gain-metric {
+  margin-top: 8px;
+  font-size: 0.88rem;
+  color: #047857;
+}
+
+.alternatives-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.alternative-train-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.alt-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.alt-train-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.alt-train-number {
+  font-size: 0.82rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.shift-score-circle {
+  background: #f0fdf4;
+  border: 2px solid #22c55e;
+  border-radius: 50%;
+  width: 54px;
+  height: 54px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-number {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #15803d;
+}
+
+.score-text {
+  font-size: 0.65rem;
+  color: #166534;
+  text-transform: uppercase;
+}
+
+.alt-metrics-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.metric-chip {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 6px 10px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.chip-label {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.chip-value {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.chip-value.high-prob { color: #16a34a; }
+.chip-value.comfort-gain { color: #0284c7; }
+
+.alt-reason {
+  font-size: 0.85rem;
+  color: #334155;
+  background: #f1f5f9;
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+
+.checklist-items {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: #334155;
+}
+
+.step-num {
+  background: #1e3a8a;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.75rem;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Station Intel Styles */
+.station-content-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.overview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.stn-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.stn-division {
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.congestion-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1px solid;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  background: #ffffff;
+}
+
+.congestion-pill .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.platforms-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.platform-row {
+  display: flex;
+  gap: 14px;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  align-items: center;
+}
+
+.pf-badge {
+  background: #1e293b;
+  color: #ffffff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-align: center;
+  min-width: 60px;
+}
+
+.pf-badge span {
+  display: block;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+}
+
+.pf-badge strong {
+  font-size: 1.1rem;
+}
+
+.pf-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pf-train-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.meter-track {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.meter-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.pf-boarding-hint {
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+.facilities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.facility-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.facility-icon {
+  font-size: 1.3rem;
+}
+
+.facility-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.facility-location {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.guidelines-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.guide-item {
+  display: flex;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #334155;
+}
+
+.helpline-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.helpline-pill {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  text-decoration: none;
+  display: inline-flex;
+  gap: 6px;
+}
+
+/* Crowd Heatmap Density Strip */
+.crowd-heatmap-bar {
+  margin-bottom: 16px;
+}
+
+.density-strip {
+  display: flex;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  margin: 10px 0 8px;
+}
+
+.strip-seg.seg-low { background: #22c55e; }
+.strip-seg.seg-med { background: #eab308; }
+.strip-seg.seg-high { background: #f97316; }
+.strip-seg.seg-ext { background: #ef4444; }
+
+.density-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.78rem;
+  color: #475569;
+}
+
+.upvote-btn {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.upvote-btn:hover:not(:disabled) {
+  background: #e2e8f0;
+}
+
+.upvote-btn.upvoted {
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #166534;
+}
+
+/* Shift Shortcut in Ticket Card */
+.shift-prompt-box {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  padding: 12px 14px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.shift-prompt-box h4 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #92400e;
+}
+
+.shift-prompt-box p {
+  font-size: 0.85rem;
+  color: #78350f;
+  margin-top: 2px;
+}
+
+.shift-shortcut-btn,
+.shift-suggest-btn {
+  background: #d97706;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.shift-shortcut-btn:hover,
+.shift-suggest-btn:hover {
+  background: #b45309;
+}
+
+.shift-card-action {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+}

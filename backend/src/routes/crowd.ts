@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { crowdStore } from '../services/crowdStore';
 import { createRateLimiter } from '../middleware/rateLimiter';
 import { getMessage } from '../i18n/translations';
+import { sanitizeText } from '../utils/sanitizer';
 
 const router = Router();
 
@@ -20,11 +21,11 @@ router.post('/report', reportLimiter, (req: Request, res: Response) => {
   const { trainId, coach, crowdLevel, cleanlinessLevel, comment } = req.body || {};
 
   const result = crowdStore.validateAndAdd({
-    trainId,
-    coach,
-    crowdLevel,
-    cleanlinessLevel,
-    comment,
+    trainId: sanitizeText(trainId),
+    coach: sanitizeText(coach),
+    crowdLevel: sanitizeText(crowdLevel),
+    cleanlinessLevel: sanitizeText(cleanlinessLevel),
+    comment: sanitizeText(comment, 500),
     reporterIp: clientIp
   });
 
@@ -45,14 +46,47 @@ router.post('/report', reportLimiter, (req: Request, res: Response) => {
   });
 });
 
+// GET /api/crowd/reports - List recent reports with optional train filter
 router.get('/reports', (req: Request, res: Response) => {
-  const trainId = req.query.trainId as string;
+  const trainId = sanitizeText(req.query.trainId as string || '');
   const reports = trainId ? crowdStore.getByTrain(trainId) : crowdStore.getAll();
 
+  res.setHeader('Cache-Control', 'no-cache');
   res.json({
     success: true,
     count: reports.length,
     reports
+  });
+});
+
+// GET /api/crowd/metrics - Aggregated coach crowd heatmap & recommendations
+router.get('/metrics', (req: Request, res: Response) => {
+  const trainId = sanitizeText(req.query.trainId as string || '');
+  const metrics = crowdStore.getMetrics(trainId || undefined);
+
+  res.setHeader('Cache-Control', 'public, max-age=30');
+  res.json({
+    success: true,
+    data: metrics,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// POST /api/crowd/:id/upvote - Fellow commuter helpfulness verification
+router.post('/:id/upvote', (req: Request, res: Response) => {
+  const id = sanitizeText(req.params.id || '');
+  const updated = crowdStore.upvote(id);
+
+  if (!updated) {
+    return res.status(404).json({
+      success: false,
+      error: 'Report not found'
+    });
+  }
+
+  res.json({
+    success: true,
+    message: 'Report verified and upvoted successfully'
   });
 });
 

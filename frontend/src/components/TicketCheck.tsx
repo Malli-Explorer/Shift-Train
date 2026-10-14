@@ -6,6 +6,9 @@ interface TicketEvaluation {
   isEligibleToBoard: boolean;
   berthAllotmentRule: string;
   cancellationRule: string;
+  chartingRule?: string;
+  confirmationProbability?: number;
+  recommendedShiftAction?: string;
   mandatoryAdvice: string;
   isDemoRuleEngine: boolean;
   summary: string;
@@ -15,10 +18,11 @@ interface TicketCheckProps {
   t: AppTranslations;
   apiBaseUrl: string;
   lang: string;
+  onNavigateToShift?: (status: string, coach?: string) => void;
 }
 
-export const TicketCheck: React.FC<TicketCheckProps> = ({ t, apiBaseUrl, lang }) => {
-  const [pnr, setPnr] = useState('241-8901234');
+export const TicketCheck: React.FC<TicketCheckProps> = ({ t, apiBaseUrl, lang, onNavigateToShift }) => {
+  const [pnr, setPnr] = useState('2418901234');
   const [ticketStatus, setTicketStatus] = useState('RAC');
   const [coach, setCoach] = useState('B2');
   const [loading, setLoading] = useState(false);
@@ -45,86 +49,131 @@ export const TicketCheck: React.FC<TicketCheckProps> = ({ t, apiBaseUrl, lang })
         })
       });
 
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || t.networkError);
       }
 
-      const data = await res.json();
       setEvaluation(data.evaluation || null);
-    } catch (err: any) {
-      console.error('Ticket check error:', err);
-      setError(t.networkError);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : t.networkError;
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="section-card">
-      <div className="section-header">
-        <h2 className="section-title">🎫 {t.ticketTitle}</h2>
-        <p className="section-desc">{t.ticketSubtitle}</p>
+    <section className="tab-panel" aria-labelledby="ticket-heading" role="tabpanel">
+      <div className="panel-header">
+        <h2 id="ticket-heading">🎫 {t.ticketTitle}</h2>
+        <p className="panel-subtitle">{t.ticketSubtitle}</p>
       </div>
 
-      <form onSubmit={handleCheck} className="ticket-form">
-        <div className="form-grid">
-          <div className="form-group">
-            <label htmlFor="pnr-input" className="form-label">{t.pnrNumber}</label>
-            <input
-              id="pnr-input"
-              type="text"
-              value={pnr}
-              onChange={(e) => setPnr(e.target.value)}
-              className="form-input"
-              placeholder="e.g. 10 digit PNR"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="ticket-status-select" className="form-label">{t.ticketStatus}</label>
-            <select
-              id="ticket-status-select"
-              value={ticketStatus}
-              onChange={(e) => setTicketStatus(e.target.value)}
-              className="form-input"
-            >
-              <option value="CNF">{t.statusCnf}</option>
-              <option value="RAC">{t.statusRac}</option>
-              <option value="WL">{t.statusWl}</option>
-              <option value="TATKAL">{t.statusTatkal}</option>
-              <option value="GENERAL">{t.statusGeneral}</option>
-              <option value="CANCELLED">{t.statusCancelled}</option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="coach-opt-input" className="form-label">{t.coachNumber} (Optional)</label>
-            <input
-              id="coach-opt-input"
-              type="text"
-              value={coach}
-              onChange={(e) => setCoach(e.target.value)}
-              className="form-input"
-              placeholder="e.g. B2, S4"
-            />
-          </div>
+      <form onSubmit={handleCheck} className="app-card form-grid" aria-label="Ticket Rules Verification Form">
+        <div className="form-group">
+          <label htmlFor="pnr-input">{t.pnrNumber}</label>
+          <input
+            id="pnr-input"
+            type="text"
+            value={pnr}
+            onChange={(e) => setPnr(e.target.value)}
+            className="form-input"
+            placeholder="e.g. 10 digit PNR (2418901234)"
+            maxLength={10}
+            pattern="\d*"
+          />
         </div>
 
-        <button type="submit" disabled={loading} className="btn-primary">
-          {loading ? t.checking : t.checkTicketButton}
-        </button>
+        <div className="form-group">
+          <label htmlFor="ticket-status-select">{t.ticketStatus}</label>
+          <select
+            id="ticket-status-select"
+            value={ticketStatus}
+            onChange={(e) => setTicketStatus(e.target.value)}
+            className="form-select"
+          >
+            <option value="CNF">{t.statusCnf}</option>
+            <option value="RAC">{t.statusRac}</option>
+            <option value="WL">{t.statusWl}</option>
+            <option value="TATKAL">{t.statusTatkal}</option>
+            <option value="GENERAL">{t.statusGeneral}</option>
+            <option value="CANCELLED">{t.statusCancelled}</option>
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="coach-opt-input">{t.coachNumber} (Optional)</label>
+          <input
+            id="coach-opt-input"
+            type="text"
+            value={coach}
+            onChange={(e) => setCoach(e.target.value)}
+            className="form-input"
+            placeholder="e.g. B2, S4"
+            maxLength={6}
+          />
+        </div>
+
+        <div className="form-actions full-width">
+          <button type="submit" disabled={loading} className="primary-btn" aria-busy={loading}>
+            {loading ? `⏳ ${t.checking}` : `🔍 ${t.checkTicketButton}`}
+          </button>
+        </div>
       </form>
 
-      {error && <div className="alert-error">{error}</div>}
+      {error && (
+        <div className="alert-box error" role="alert" aria-live="assertive">
+          ⚠️ {error}
+        </div>
+      )}
 
       {evaluation && (
-        <div className="evaluation-card">
+        <div className="evaluation-card app-card" aria-live="polite">
           <div className="eval-status-row">
             <div className={`status-pill ${evaluation.isEligibleToBoard ? 'eligible' : 'ineligible'}`}>
               {evaluation.isEligibleToBoard ? `✓ ${t.eligibleToBoard}` : `✕ ${t.notEligibleToBoard}`}
             </div>
             <span className="eval-badge">Status: {evaluation.status}</span>
           </div>
+
+          {/* Confirmation Probability Gauge */}
+          {evaluation.confirmationProbability !== undefined && (
+            <div className="probability-bar-row">
+              <div className="label-flex">
+                <span>{t.confirmationProbability}:</span>
+                <strong>{evaluation.confirmationProbability}%</strong>
+              </div>
+              <div className="meter-track" role="progressbar" aria-valuenow={evaluation.confirmationProbability} aria-valuemin={0} aria-valuemax={100}>
+                <div
+                  className="meter-fill"
+                  style={{
+                    width: `${evaluation.confirmationProbability}%`,
+                    backgroundColor: evaluation.confirmationProbability >= 75 ? '#16a34a' : (evaluation.confirmationProbability >= 40 ? '#d97706' : '#dc2626')
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Recommended Shift Action Card (Especially for WL & RAC) */}
+          {evaluation.recommendedShiftAction && (
+            <div className="shift-prompt-box">
+              <div className="prompt-content">
+                <h4>💡 {t.recommendedShiftAction}</h4>
+                <p>{evaluation.recommendedShiftAction}</p>
+              </div>
+              {onNavigateToShift && (evaluation.status.includes('WL') || evaluation.status === 'RAC') && (
+                <button
+                  type="button"
+                  className="shift-shortcut-btn"
+                  onClick={() => onNavigateToShift(evaluation.status, coach)}
+                >
+                  ⚡ Open Shift Advisor
+                </button>
+              )}
+            </div>
+          )}
 
           <div className="eval-rules">
             <div className="rule-item">
@@ -137,13 +186,20 @@ export const TicketCheck: React.FC<TicketCheckProps> = ({ t, apiBaseUrl, lang })
               <p className="rule-content">{evaluation.cancellationRule}</p>
             </div>
 
-            <div className="mandatory-advice-box">
+            {evaluation.chartingRule && (
+              <div className="rule-item">
+                <span className="rule-heading">📊 {t.chartingRule}</span>
+                <p className="rule-content">{evaluation.chartingRule}</p>
+              </div>
+            )}
+
+            <div className="mandatory-advice-box" role="alert">
               <span className="advice-title">⚠️ {t.mandatoryAdvice}</span>
               <p className="advice-text">{evaluation.mandatoryAdvice}</p>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 };

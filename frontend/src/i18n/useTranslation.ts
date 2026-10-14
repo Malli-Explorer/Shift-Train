@@ -12,6 +12,9 @@ export function useTranslation() {
 
   useEffect(() => {
     localStorage.setItem('shifttrain_lang', lang);
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = lang;
+    }
   }, [lang]);
 
   const currentLanguageInfo: LanguageInfo = LANGUAGES.find(l => l.code === lang) || LANGUAGES[0];

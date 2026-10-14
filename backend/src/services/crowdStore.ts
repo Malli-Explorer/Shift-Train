@@ -1,12 +1,15 @@
+import { sanitizeText, isValidCoach } from '../utils/sanitizer';
+
 export interface CrowdReport {
   id: string;
   trainId: string;
   coach: string;
   crowdLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'EXTREME';
-  cleanlinessLevel?: 'POOR' | 'AVERAGE' | 'CLEAN';
+  cleanlinessLevel: 'POOR' | 'AVERAGE' | 'CLEAN';
   comment: string;
   timestamp: number;
   reporterIp?: string;
+  upvotes: number;
 }
 
 export interface CrowdSubmissionInput {
@@ -16,6 +19,18 @@ export interface CrowdSubmissionInput {
   cleanlinessLevel?: string;
   comment?: string;
   reporterIp?: string;
+}
+
+export interface CrowdAggregateMetrics {
+  totalReports: number;
+  distribution: {
+    LOW: number;
+    MEDIUM: number;
+    HIGH: number;
+    EXTREME: number;
+  };
+  mostCrowdedCoaches: string[];
+  recommendedCoaches: string[];
 }
 
 export class CrowdStore {
@@ -36,19 +51,69 @@ export class CrowdStore {
     return this.reports.filter(r => r.trainId.toUpperCase() === cleanTrainId);
   }
 
-  public validateAndAdd(input: CrowdSubmissionInput): { success: boolean; errorKey?: 'duplicateReport' | 'sizeLimitExceeded' | 'invalidPayload'; report?: CrowdReport } {
+  public upvote(reportId: string): boolean {
+    const report = this.reports.find(r => r.id === reportId);
+    if (report) {
+      report.upvotes = (report.upvotes || 0) + 1;
+      return true;
+    }
+    return false;
+  }
+
+  public getMetrics(trainId?: string): CrowdAggregateMetrics {
+    const targetReports = trainId ? this.getByTrain(trainId) : this.getAll();
+    const distribution = { LOW: 0, MEDIUM: 0, HIGH: 0, EXTREME: 0 };
+    const coachCrowdCount: Record<string, number> = {};
+
+    for (const r of targetReports) {
+      if (distribution[r.crowdLevel] !== undefined) {
+        distribution[r.crowdLevel] += 1;
+      }
+      const weight = r.crowdLevel === 'EXTREME' ? 4 : (r.crowdLevel === 'HIGH' ? 3 : (r.crowdLevel === 'MEDIUM' ? 2 : 1));
+      coachCrowdCount[r.coach] = (coachCrowdCount[r.coach] || 0) + weight;
+    }
+
+    const sortedCoaches = Object.entries(coachCrowdCount).sort((a, b) => b[1] - a[1]);
+    const mostCrowdedCoaches = sortedCoaches.slice(0, 3).map(([coach]) => coach);
+    const recommendedCoaches = sortedCoaches.slice(-3).reverse().map(([coach]) => coach);
+
+    return {
+      totalReports: targetReports.length,
+      distribution,
+      mostCrowdedCoaches,
+      recommendedCoaches
+    };
+  }
+
+  public validateAndAdd(input: CrowdSubmissionInput): { 
+    success: boolean; 
+    errorKey?: 'duplicateReport' | 'sizeLimitExceeded' | 'invalidPayload'; 
+    report?: CrowdReport 
+  } {
     if (!input.trainId || !input.coach || !input.crowdLevel) {
       return { success: false, errorKey: 'invalidPayload' };
     }
 
-    const comment = (input.comment || '').trim();
-    if (comment.length > this.maxCommentLength) {
+    // Sanitize text inputs
+    const rawComment = input.comment || '';
+    if (rawComment.length > this.maxCommentLength) {
       return { success: false, errorKey: 'sizeLimitExceeded' };
     }
 
-    const normalizedTrainId = input.trainId.trim().toUpperCase();
-    const normalizedCoach = input.coach.trim().toUpperCase();
-    const normalizedCrowd = input.crowdLevel.trim().toUpperCase();
+    const sanitizedComment = sanitizeText(rawComment, this.maxCommentLength);
+    const normalizedTrainId = sanitizeText(input.trainId).toUpperCase();
+    const normalizedCoach = sanitizeText(input.coach).toUpperCase();
+    const normalizedCrowd = sanitizeText(input.crowdLevel).toUpperCase();
+
+    if (!isValidCoach(normalizedCoach)) {
+      return { success: false, errorKey: 'invalidPayload' };
+    }
+
+    const validLevels = ['LOW', 'MEDIUM', 'HIGH', 'EXTREME'];
+    if (!validLevels.includes(normalizedCrowd)) {
+      return { success: false, errorKey: 'invalidPayload' };
+    }
+
     const now = Date.now();
 
     // Duplicate check: Same train, coach, crowd level within recent window
@@ -65,15 +130,20 @@ export class CrowdStore {
       return { success: false, errorKey: 'duplicateReport' };
     }
 
+    const cleanLevel = (sanitizeText(input.cleanlinessLevel || '').toUpperCase() as CrowdReport['cleanlinessLevel']) || 'AVERAGE';
+    const validCleanliness = ['POOR', 'AVERAGE', 'CLEAN'];
+    const finalClean = validCleanliness.includes(cleanLevel) ? cleanLevel : 'AVERAGE';
+
     const newReport: CrowdReport = {
       id: `cr-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
       trainId: normalizedTrainId,
       coach: normalizedCoach,
       crowdLevel: normalizedCrowd as CrowdReport['crowdLevel'],
-      cleanlinessLevel: (input.cleanlinessLevel?.toUpperCase() as CrowdReport['cleanlinessLevel']) || 'AVERAGE',
-      comment,
+      cleanlinessLevel: finalClean,
+      comment: sanitizedComment,
       timestamp: now,
-      reporterIp: input.reporterIp
+      reporterIp: input.reporterIp,
+      upvotes: 0
     };
 
     this.reports.unshift(newReport);
