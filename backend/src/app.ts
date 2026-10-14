@@ -32,6 +32,21 @@ app.use(cors({
 app.use(express.json({ limit: '50kb' }));
 app.use(express.urlencoded({ extended: true, limit: '50kb' }));
 
+// Root Welcome Route
+app.get('/', (_req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'shifttrain-ai-backend',
+    message: 'ShiftTrain AI API is live and operational.',
+    endpoints: {
+      health: '/api/health',
+      trains: '/api/trains/search',
+      crowd: '/api/crowd/reports',
+      ticket: '/api/ticket/check'
+    }
+  });
+});
+
 // Health Check
 app.get('/api/health', (_req, res) => {
   res.json({
